@@ -158,7 +158,9 @@ export global GroupVisibility {
 /// = not-a-node convention (note: negative IDs are valid node IDs, so `-1`
 /// would be ambiguous here — unlike the link-hover API).
 export global HoverState {
-    /// The node ID currently under the pointer, or 0 if none.
+    /// The node whose `hovered` is true, or 0 if none: the node under the
+    /// pointer, or the one whose content holds a press the pointer has since
+    /// dragged away from it.
     in-out property <int> hovered-node-id: 0;
 }
 
@@ -1224,7 +1226,10 @@ export component BaseNode inherits Rectangle {
     // Exposed so subclasses can react to hover directly (e.g. show pills/badges),
     // and aggregated to NodeEditor.hovered-node-id via the HoverState global.
     // drag-area holds the subclass's content, so its has-hover stays true over
-    // every child inside the node's rect.
+    // every child inside the node's rect, and while a child holds a press (a
+    // link dragged from a pin, say) until its release. Content drawn outside
+    // the rect, such as the outer half of a pin centred on the edge, does not
+    // hover the node: a TouchArea takes hover only within its own bounds.
     out property <bool> hovered: drag-area.has-hover;
     changed hovered => {
         // Guard against node-id == 0 (unbound) — same convention as geometry reporting.

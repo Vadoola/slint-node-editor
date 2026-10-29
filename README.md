@@ -12,7 +12,7 @@ connections, embedded controls, animated links, and automatic layout.
 ## Features
 
 - Node dragging, multi-selection, and box selection.
-- Node groups with movable, collapsible backing sheets (unreleased).
+- Node groups with movable, collapsible backing sheets.
 - Interactive connections with application-defined pin compatibility.
 - Pan, zoom, grid, and minimap.
 - Custom node shapes, embedded Slint controls, and link styling and routing.
@@ -63,16 +63,16 @@ Start with its four files:
 - [ui/app.slint](smoke/downstream/ui/app.slint)
 - [src/main.rs](smoke/downstream/src/main.rs)
 
-The published 1.0.1 release uses the registry dependency:
+Add the registry dependency:
 
 ```toml
-slint-node-editor = "1.0.1"
+slint-node-editor = "2.0.0"
 ```
 
-The documentation on `main` also covers unreleased groups, viewport resize
-notifications, link palettes/dimming, corrected layout coordinates, and rank
-alignment. Published 1.0.1 returns node centres despite documenting corners. Those features
-require a checkout until the next release; the guides mark them accordingly.
+Upgrading from 1.x: see the 2.0.0 migration notes in [CHANGELOG.md](CHANGELOG.md).
+Generated Slint structs such as `LinkData` may gain fields in minor releases, so
+build them with their constructor or end a literal in `..Default::default()`; see
+[compatibility and releases](CONTRIBUTING.md#compatibility-and-releases).
 
 The integration has three parts:
 

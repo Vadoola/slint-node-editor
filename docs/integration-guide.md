@@ -2,9 +2,9 @@
 
 [README](../README.md) · [Component reference](component-reference.md)
 
-The quick start uses the published **1.0.1** API. Sections marked **Unreleased**
-require a checkout of `main`; they are not available in the published crate.
-The component reference describes `main`.
+The quick start uses the published **2.0.0** API, which the component reference
+also describes. Upgrading from 1.x: see the 2.0.0 migration notes in the
+[changelog](../CHANGELOG.md).
 
 The quick start is a complete downstream crate, compiled outside this workspace
 by [`smoke/run.sh packaged`](../smoke/run.sh). Copy its four application files:
@@ -20,7 +20,7 @@ or delete nodes.
 
 ## 1. Add dependencies
 
-Slint Node Editor 1.0.1 requires Slint 1.18.0 or newer and Rust 1.92 or newer.
+Slint Node Editor 2.0.0 requires Slint 1.18.0 or newer and Rust 1.92 or newer.
 The manifest below uses the published crates.io package.
 The software renderer avoids a native graphics SDK dependency.
 
@@ -34,7 +34,7 @@ edition = "2021"
 
 [dependencies]
 slint = { version = "1.18.0", default-features = false, features = ["std", "compat-1-18", "backend-winit", "renderer-software"] }
-slint-node-editor = "1.0.1"
+slint-node-editor = "2.0.0"
 
 [build-dependencies]
 slint-build = { version = "1.18.0", features = ["experimental-module-builds"] }
@@ -215,9 +215,8 @@ remain caller-validated APIs.
 ### Viewport size and transform
 
 `NodeEditorComputations.viewport-changed(zoom, pan-x, pan-y)` reports pan and
-zoom changes. The **unreleased**
-`NodeEditorComputations.viewport-resized(width, height)` callback reports
-changes to the editor's own dimensions in logical pixels. Listen to both when
+zoom changes. The `NodeEditorComputations.viewport-resized(width, height)`
+callback reports changes to the editor's own dimensions in logical pixels. Listen to both when
 tracking the visible world rectangle; `request-grid-update` is only a request
 to regenerate the grid and is unnecessary for a host without one.
 
@@ -262,7 +261,7 @@ no status override. Link box selection uses endpoint inclusion:
 either endpoint inside or on the box selects the link; a crossing curve whose
 endpoints are both outside is omitted.
 
-### Link accents and dimming (Unreleased)
+### Link accents and dimming
 
 To colour links from your theme, bind `NodeEditor.link-accent-colors` to your
 theme's colours and set each link's `accent` to a 1-based index into it. A link
@@ -282,7 +281,7 @@ colour's alpha by `NodeEditor.dimmed-link-alpha` (default 0.25), preserving
 its hue. The [custom-shapes example](../examples/custom-shapes) demonstrates
 theme changes and dimming links outside a chosen node's focus.
 
-### Groups (Unreleased)
+### Groups
 
 A group is model data like selection: membership is the `group_id` on each
 node row (0 for none), and each group is a `GroupData` row with authoritative

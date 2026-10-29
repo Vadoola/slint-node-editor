@@ -40,6 +40,15 @@ migration instructions in CHANGELOG.md. Prefer deprecation when an existing API
 can remain correct. Changes to callback ownership, units, IDs, and generated
 Slint types are API changes even if their Rust signatures are unchanged.
 
+Since 2.0, one change to generated Slint structs is not breaking: a new field
+whose default keeps the previous behaviour may arrive in a minor release.
+Construct structs such as `LinkData` and `GroupData` through their constructors
+or end a literal in `..Default::default()`; a literal naming every field is not
+covered by this compatibility promise. Renaming or removing a field, changing
+its meaning, or adding one whose default changes behaviour still requires a
+major version. The generated `Inner*` globals and `SharedGlobals` are
+implementation details of Slint's code generator, not API.
+
 Run the Release verification workflow on the intended release commit before
 publishing. It checks the real archive, downstream interaction, minimum Rust
 version, and publication dry run. Included-files smoke success alone is not a

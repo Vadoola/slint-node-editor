@@ -1,7 +1,7 @@
-# Releasing slint-node-editor 1.0.1
+# Releasing slint-node-editor 2.0.0
 
-Release date: 2026-09-17. Release branch: `release/1.0.1`. Tag: `v1.0.1`.
-Release notes: [1.0.1](releases/1.0.1.md).
+Release date: 2026-10-29. Release branch: `release/2.0.0`. Tag: `v2.0.0`.
+Release notes: [2.0.0](releases/2.0.0.md).
 
 ## Dependency and distribution contract
 
@@ -47,10 +47,10 @@ committing; a previous candidate's results do not validate the release commit.
 
 ## Preparation
 
-1. Commit all 1.0.1 version references, changelog, and release notes on
-   `release/1.0.1` and run the strict checks above.
-2. Create an annotated `v1.0.1` tag on that commit and push the branch and tag.
-3. Create a GitHub draft release for the tag using [the release notes](releases/1.0.1.md).
+1. Commit all 2.0.0 version references, changelog, and release notes on
+   `release/2.0.0` and run the strict checks above.
+2. Create an annotated `v2.0.0` tag on that commit and push the branch and tag.
+3. Create a GitHub draft release for the tag using [the release notes](releases/2.0.0.md).
 4. Confirm the Release verification workflow passes for that revision.
 
 Preparation leaves the crate unpublished and the GitHub release in draft.
@@ -59,7 +59,7 @@ Preparation leaves the crate unpublished and the GitHub release in draft.
 
 1. From the clean tagged checkout, confirm crates.io credentials and run
    `cargo publish --locked -p slint-node-editor` when publication is authorized.
-2. Run `./smoke/run.sh registry` against the published 1.0.1 crate and confirm
+2. Run `./smoke/run.sh registry` against the published 2.0.0 crate and confirm
    docs.rs builds successfully. Verify that the README served by crates.io
    contains the intended media URLs and that those URLs download successfully.
 3. Publish the prepared GitHub release and mark it as the latest release.
