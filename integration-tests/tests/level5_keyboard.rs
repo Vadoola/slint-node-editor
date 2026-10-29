@@ -18,6 +18,7 @@ fn test_delete_removes_selected_nodes_from_model() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 2,
@@ -26,6 +27,7 @@ fn test_delete_removes_selected_nodes_from_model() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 3,
@@ -34,6 +36,7 @@ fn test_delete_removes_selected_nodes_from_model() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![],
@@ -81,6 +84,7 @@ fn test_delete_removes_selected_links_from_model() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             common::harness::NodeData {
                 id: 2,
@@ -89,6 +93,7 @@ fn test_delete_removes_selected_links_from_model() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![
@@ -150,6 +155,7 @@ fn test_deleting_node_should_also_remove_connected_links() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 2,
@@ -158,6 +164,7 @@ fn test_deleting_node_should_also_remove_connected_links() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![LinkData {
@@ -241,6 +248,7 @@ fn test_delete_multiple_selected_nodes() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 2,
@@ -249,6 +257,7 @@ fn test_delete_multiple_selected_nodes() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 3,
@@ -257,6 +266,7 @@ fn test_delete_multiple_selected_nodes() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![],

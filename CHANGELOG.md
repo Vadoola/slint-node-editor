@@ -3,9 +3,9 @@
 ## Unreleased
 
 - Fix a marquee started on a node or group sheet (with the box-selection
-  modifier, or on an unmovable node) being drawn and committed offset by the
+  modifier, or on an undraggable node) being drawn and committed offset by the
   editor's position in its window.
-- `BaseNode.movable`, default `true`: off, a drag starting on the node does
+- `BaseNode.draggable`, default `true`: off, a drag starting on the node does
   what one on empty canvas does (a marquee when `box-selection-on-empty` is
   on, nothing otherwise); the node does not move, no `start-node-drag` or
   `end-node-drag` is reported, and the release is no click. A press still

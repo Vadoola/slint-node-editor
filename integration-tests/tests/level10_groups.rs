@@ -26,6 +26,7 @@ fn node(id: i32, x: f32, y: f32, group_id: i32) -> common::harness::NodeData {
         y,
         selected: false,
         group_id,
+        draggable: true,
     }
 }
 

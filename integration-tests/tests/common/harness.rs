@@ -96,6 +96,7 @@ impl MinimalTestHarness {
                     y: 100.0,
                     selected: false,
                     group_id: 0,
+                    draggable: true,
                 },
                 NodeData {
                     id: 2,
@@ -104,6 +105,7 @@ impl MinimalTestHarness {
                     y: 200.0,
                     selected: false,
                     group_id: 0,
+                    draggable: true,
                 },
             ],
             vec![LinkData {
@@ -390,6 +392,17 @@ impl MinimalTestHarness {
             }
         }
         None
+    }
+
+    /// Write a node row's `draggable`, which its `BaseNode.draggable` is bound
+    /// to.
+    pub fn set_node_draggable(&self, node_id: i32, draggable: bool) {
+        let index = (0..self.nodes.row_count())
+            .find(|&i| self.nodes.row_data(i).is_some_and(|n| n.id == node_id))
+            .expect("node row");
+        let mut node = self.nodes.row_data(index).unwrap();
+        node.draggable = draggable;
+        self.nodes.set_row_data(index, node);
     }
 
     // === Mouse event helpers ===

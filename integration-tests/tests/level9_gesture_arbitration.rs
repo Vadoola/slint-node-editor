@@ -494,10 +494,10 @@ fn double_click_counter(harness: &MinimalTestHarness) -> Rc<Cell<u32>> {
 }
 
 #[test]
-fn a_drag_on_an_unmovable_node_acts_as_one_on_empty_canvas() {
+fn a_drag_on_an_undraggable_node_acts_as_one_on_empty_canvas() {
     for box_selection_on_empty in [true, false] {
         let harness = MinimalTestHarness::new();
-        harness.window.set_test_unmovable_node_id(1);
+        harness.set_node_draggable(1, false);
         harness
             .window
             .set_box_selection_on_empty(box_selection_on_empty);
@@ -534,9 +534,9 @@ fn a_drag_on_an_unmovable_node_acts_as_one_on_empty_canvas() {
 }
 
 #[test]
-fn sliding_off_a_selected_unmovable_node_is_not_a_click() {
+fn sliding_off_a_selected_undraggable_node_is_not_a_click() {
     let harness = MinimalTestHarness::new();
-    harness.window.set_test_unmovable_node_id(1);
+    harness.set_node_draggable(1, false);
     // Off, so no marquee commit replaces the selection under test.
     harness.window.set_box_selection_on_empty(false);
     realize(&harness);
@@ -555,10 +555,10 @@ fn sliding_off_a_selected_unmovable_node_is_not_a_click() {
 }
 
 #[test]
-fn a_slide_on_an_unmovable_node_does_not_arm_a_double_click() {
+fn a_slide_on_an_undraggable_node_does_not_arm_a_double_click() {
     for box_selection_on_empty in [true, false] {
         let harness = MinimalTestHarness::new();
-        harness.window.set_test_unmovable_node_id(1);
+        harness.set_node_draggable(1, false);
         harness
             .window
             .set_box_selection_on_empty(box_selection_on_empty);
@@ -575,9 +575,9 @@ fn a_slide_on_an_unmovable_node_does_not_arm_a_double_click() {
 }
 
 #[test]
-fn dragging_a_node_carries_a_selected_unmovable_one() {
+fn dragging_a_node_carries_a_selected_undraggable_one() {
     let harness = MinimalTestHarness::new();
-    harness.window.set_test_unmovable_node_id(2);
+    harness.set_node_draggable(2, false);
     realize(&harness);
     let node_b = harness.node_center(2).unwrap();
     harness.click(node_b.0, node_b.1);
@@ -589,8 +589,8 @@ fn dragging_a_node_carries_a_selected_unmovable_one() {
 
     let drawn_b = || {
         (
-            harness.window.get_observed_unmovable_screen_x(),
-            harness.window.get_observed_unmovable_screen_y(),
+            harness.window.get_observed_undraggable_screen_x(),
+            harness.window.get_observed_undraggable_screen_y(),
         )
     };
     let before = drawn_b();
@@ -608,9 +608,9 @@ fn dragging_a_node_carries_a_selected_unmovable_one() {
 }
 
 #[test]
-fn a_movable_node_beside_an_unmovable_one_still_drags() {
+fn a_draggable_node_beside_an_undraggable_one_still_drags() {
     let harness = MinimalTestHarness::new();
-    harness.window.set_test_unmovable_node_id(2);
+    harness.set_node_draggable(2, false);
     realize(&harness);
     let (x, y) = surface_point(&harness, Surface::Node);
     harness.mouse_down(x, y);
@@ -645,7 +645,7 @@ fn a_box_started_on_a_node_or_pin_is_editor_relative() {
         }
         (x - EDITOR_X, y - EDITOR_Y)
     };
-    // A slide on the unmovable node, then the marquee modifier on it and on its pin.
+    // A slide on the undraggable node, then the marquee modifier on it and on its pin.
     for (from, modifier) in [
         (Surface::Node, false),
         (Surface::Node, true),
@@ -654,7 +654,7 @@ fn a_box_started_on_a_node_or_pin_is_editor_relative() {
         let harness = MinimalTestHarness::new();
         harness.window.set_test_editor_x(EDITOR_X);
         harness.window.set_test_editor_y(EDITOR_Y);
-        harness.window.set_test_unmovable_node_id(1);
+        harness.set_node_draggable(1, false);
         realize(&harness);
         // The modifier must reach the node, not the editor's own overlay.
         harness.window.invoke_clear_editor_focus();

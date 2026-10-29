@@ -62,7 +62,7 @@ export enum BoxSelectionModifier {
 /// and their pins.
 export global NodeEditorGestureConfig {
     in-out property <BoxSelectionModifier> box-selection-modifier: BoxSelectionModifier.ctrl;
-    /// NodeEditor's `box-selection-on-empty`, so an unmovable node can act
+    /// NodeEditor's `box-selection-on-empty`, so an undraggable node can act
     /// as empty canvas does.
     in-out property <bool> box-selection-on-empty: true;
 
@@ -850,7 +850,7 @@ export component Link inherits Path {
 /// already selected, so dragging a selected item keeps the selection. A move
 /// past the threshold drags, and the release commits it; a release without a
 /// move is a click. The configured modifier forwards a marquee to the editor
-/// instead, and so does a slide on an unmovable owner whenever a drag on
+/// instead, and so does a slide on an undraggable owner whenever a drag on
 /// empty canvas would draw one. Owners turn the callbacks into intents: the
 /// gesture holds no ids and touches no shared drag state itself.
 component DragGesture inherits TouchArea {
@@ -863,7 +863,7 @@ component DragGesture inherits TouchArea {
     /// Off, a move past the threshold starts no drag: no drag callback and
     /// no offset. It does what a drag on empty canvas does instead, and the
     /// release is no click, so it applies no deferred selection.
-    in property <bool> movable: true;
+    in property <bool> draggable: true;
     /// True while a drag is in progress.
     out property <bool> is-dragging: false;
     /// Live drag offset in world units; zero outside a drag.
@@ -890,7 +890,7 @@ component DragGesture inherits TouchArea {
     property <bool> was-selected-on-press: false;
     /// Whether this press emitted a selection intent.
     property <bool> selection-intent-sent: false;
-    /// The pointer passed the threshold while the owner was not movable and
+    /// The pointer passed the threshold while the owner was not draggable and
     /// the canvas draws no marquee on an empty-area drag.
     property <bool> slid: false;
     // The pointer in the editor's space, which a forwarded marquee is read in
@@ -1006,7 +1006,7 @@ component DragGesture inherits TouchArea {
         } else if self.pressed && !root.press-cancelled {
             if !root.is-dragging && !root.slid {
                 if abs(root.pointer-x - root.press-x) > root.drag-threshold || abs(root.pointer-y - root.press-y) > root.drag-threshold {
-                    if root.movable {
+                    if root.draggable {
                         root.is-dragging = true;
                         root.drag-started(root.was-selected-on-press || root.selection-intent-sent);
                     } else if NodeEditorGestureConfig.box-selection-on-empty {
@@ -1059,7 +1059,7 @@ export component BaseNode inherits Rectangle {
     /// press still selects it. Only the node's own gesture is governed: a
     /// drag of another selected node, or of its group's sheet, still carries
     /// it.
-    in property <bool> movable: true;
+    in property <bool> draggable: true;
 
     // === Accessibility ===
     accessible-role: list-item;
@@ -1246,7 +1246,7 @@ export component BaseNode inherits Rectangle {
         owner-screen-x: root.screen-x;
         owner-screen-y: root.screen-y;
         selected: root.selected;
-        movable: root.movable;
+        draggable: root.draggable;
 
         selection-requested(shift) => {
             SelectionRequest.node-id = node-id;

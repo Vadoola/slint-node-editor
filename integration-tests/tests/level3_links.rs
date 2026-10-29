@@ -613,6 +613,7 @@ fn test_add_new_link_to_model() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             common::harness::NodeData {
                 id: 2,
@@ -621,6 +622,7 @@ fn test_add_new_link_to_model() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             common::harness::NodeData {
                 id: 3,
@@ -629,6 +631,7 @@ fn test_add_new_link_to_model() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![],

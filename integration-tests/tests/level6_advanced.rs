@@ -194,6 +194,7 @@ fn test_multi_node_drag_updates_all_selected() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 2,
@@ -202,6 +203,7 @@ fn test_multi_node_drag_updates_all_selected() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             NodeData {
                 id: 3,
@@ -210,6 +212,7 @@ fn test_multi_node_drag_updates_all_selected() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![],
@@ -440,6 +443,7 @@ fn test_find_links_connected_to_node() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             common::harness::NodeData {
                 id: 2,
@@ -448,6 +452,7 @@ fn test_find_links_connected_to_node() {
                 y: 200.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
             common::harness::NodeData {
                 id: 3,
@@ -456,6 +461,7 @@ fn test_find_links_connected_to_node() {
                 y: 100.0,
                 selected: false,
                 group_id: 0,
+                draggable: true,
             },
         ],
         vec![
