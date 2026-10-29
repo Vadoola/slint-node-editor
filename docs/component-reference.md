@@ -240,8 +240,8 @@ callbacks by hand out of the `selection` module — see the `advanced`
 example, which spans two node models sharing one id space.
 
 `GraphLogic::commit_drag` moves the dragged
-node plus every row the model shows as selected, which is the same data the
-editor renders.
+node plus every row the model shows as selected and draggable, which is the
+same data the editor renders.
 
 `box-selection-modifier` reserves a left-button marquee over every editor
 surface, including links, nodes, pins, and controls embedded in nodes. `ctrl`
@@ -317,7 +317,7 @@ in property <int> node-id;             // Unique node ID
 in property <length> world-x;          // X position in graph space
 in property <length> world-y;          // Y position in graph space
 in property <bool> selected: false;    // Selection state — bind it from your model row
-in property <bool> draggable: true;    // Unreleased: off, a drag starting here acts as on empty canvas
+in property <bool> draggable: true;    // Unreleased: off, only its group's drag moves it — bind it from your model row
 in property <length> node-width: 150px;
 in property <length> node-height: 100px;
 out property <length> screen-x;         // Includes the current global zoom/pan
@@ -327,12 +327,20 @@ out property <length> screen-y;
 `BaseNode` reads zoom and pan from `ViewportState`; consumers do not pass those
 values into each node.
 
-With `draggable` off, a left drag starting on the node draws a marquee when the
-editor's `box-selection-on-empty` is on and does nothing otherwise; the node
-stays put and the host sees no `start-node-drag` or `end-node-drag`. A press
-still selects the node, and the release is no click. `draggable` governs only
-the node's own gesture: a drag of another selected node, or of its group's
-sheet, still carries it.
+With `draggable` off, a user drag moves the node only with its group. A left
+drag starting on the node draws a marquee when the editor's
+`box-selection-on-empty` is on and does nothing otherwise; the host sees no
+`start-node-drag` or `end-node-drag`. A press still selects the node, and the
+release is no click. A drag of other selected nodes leaves it in place, and a
+group that moves, its sheet dragged or the group selected, carries it.
+
+Bind `draggable` from the same row field your `MovableNode::draggable` returns,
+as you bind `selected`: the node previews the drag from the property and
+`GraphLogic::commit_drag` / `GroupLogic::commit_drag` read the trait, so two
+sources let a node stand still under a drag and jump on release. A Slint
+struct's `bool` field defaults to `false`, so a `draggable` field on a row
+built with `Default` makes that node undraggable. Host writes to the rows,
+such as a layout or an undo, are not governed by `draggable`.
 
 ## Pin
 
@@ -461,11 +469,12 @@ the links, so keep the interior translucent. Hit testing is rectangular whatever
 the subclass draws.
 
 **Movement.** One rule decides what a drag moves, whether it started on a node
-or on a sheet: the dragged item, every selected node, every selected group's
-sheet, and the members of every group that moves. The editor asks the host the
-same question for its live preview (`NodeEditorComputations.group-in-drag`) that
-the host's commit answers with `GroupLogic`, so the preview and the committed
-positions cannot disagree. Members are never marked selected to achieve this.
+or on a sheet: the dragged item, every selected draggable node, every selected
+group's sheet, and the members of every group that moves, draggable or not. The
+editor asks the host the same question for its live preview
+(`NodeEditorComputations.group-in-drag`) that the host's commit answers with
+`GroupLogic`, so the preview and the committed positions cannot disagree.
+Members are never marked selected to achieve this.
 
 **Collapse** is a visibility projection, not a removal. Members are not
 rendered, take no input, and report themselves hidden; the geometry cache keeps

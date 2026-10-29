@@ -582,7 +582,7 @@ fn a_slide_on_an_undraggable_node_does_not_arm_a_double_click() {
 }
 
 #[test]
-fn dragging_a_node_carries_a_selected_undraggable_one() {
+fn dragging_a_node_leaves_a_selected_undraggable_one_in_place() {
     let harness = MinimalTestHarness::new();
     harness.set_node_draggable(2, false);
     realize(&harness);
@@ -603,15 +603,18 @@ fn dragging_a_node_carries_a_selected_undraggable_one() {
     let before = drawn_b();
     harness.mouse_down(x, y);
     harness.mouse_move(x + 40.0, y + 30.0);
-    assert_eq!(drawn_b(), (before.0 + 40.0, before.1 + 30.0));
+    assert_eq!(drawn_b(), before);
     harness.mouse_up(x + 40.0, y + 30.0);
 
     assert_eq!(
         *harness.tracker.node_drag_ended.borrow(),
         vec![(40.0, 30.0)]
     );
+    let dragged = harness.node_data(1).unwrap();
+    assert_eq!((dragged.x, dragged.y), (140.0, 130.0));
     let node = harness.node_data(2).unwrap();
-    assert_eq!((node.x, node.y), (440.0, 230.0));
+    assert_eq!((node.x, node.y), (400.0, 200.0));
+    assert_eq!(drawn_b(), before);
 }
 
 #[test]

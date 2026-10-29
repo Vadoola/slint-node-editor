@@ -44,6 +44,9 @@ impl MovableNode for NodeData {
     fn set_y(&mut self, y: f32) {
         self.y = y;
     }
+    fn draggable(&self) -> bool {
+        self.draggable
+    }
 }
 
 impl GroupMember for NodeData {
@@ -394,8 +397,8 @@ impl MinimalTestHarness {
         None
     }
 
-    /// Write a node row's `draggable`, which its `BaseNode.draggable` is bound
-    /// to.
+    /// Write a node row's `draggable`, the field both its `BaseNode.draggable`
+    /// and the drag commit read.
     pub fn set_node_draggable(&self, node_id: i32, draggable: bool) {
         let index = (0..self.nodes.row_count())
             .find(|&i| self.nodes.row_data(i).is_some_and(|n| n.id == node_id))

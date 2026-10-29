@@ -41,7 +41,8 @@ export struct NodeData {
     selected: bool,
     /// Membership: the group this node belongs to, or 0
     group-id: int,
-    /// Bound to `BaseNode.draggable`
+    /// Bound to `BaseNode.draggable` and read by the drag commit, as
+    /// `selected` is
     draggable: bool,
 }
 

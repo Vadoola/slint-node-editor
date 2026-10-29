@@ -1053,12 +1053,13 @@ export component BaseNode inherits Rectangle {
     in property <int> group-id: 0;
     in property <length> world-x;
     in property <length> world-y;
-    /// Off, a drag starting on this node does what one on empty canvas does:
-    /// it draws a marquee when `box-selection-on-empty` is on, and nothing
-    /// otherwise. The node does not move, the host sees no node drag, and a
-    /// press still selects it. Only the node's own gesture is governed: a
-    /// drag of another selected node, or of its group's sheet, still carries
-    /// it.
+    /// Off, a user drag moves this node only with its group. A drag starting
+    /// on it does what one on empty canvas does: it draws a marquee when
+    /// `box-selection-on-empty` is on and nothing otherwise, the host sees no
+    /// node drag, and a press still selects it. A drag of other selected nodes
+    /// leaves it in place; a group that moves carries it. Bind it from your
+    /// model row, the field your `MovableNode::draggable` reads, as you bind
+    /// `selected`: the preview reads this, the drag commit reads that.
     in property <bool> draggable: true;
 
     // === Accessibility ===
@@ -1087,23 +1088,26 @@ export component BaseNode inherits Rectangle {
 
     // === Computed Properties ===
     // World position (for reporting to Rust)
-    // For multi-node drag: selected nodes that aren't being directly dragged use global DragState offset.
+    // For multi-node drag: selected, draggable nodes that aren't being directly
+    // dragged use global DragState offset; the drag commit moves the same rows.
     // root.selected must be read FIRST: && short-circuits, and a dependency is
     // recorded on every property read during evaluation — with the global
     // DragState.is-dragging in front, every node in the graph re-evaluates (and
     // repaints) on the drag start/end toggle. Selected-first scopes that toggle
-    // to the selection, which is the set that moves anyway.
+    // to the selection, the only nodes the selection can carry.
     //
-    // A member also follows a shared drag when its group moves: the sheet is
-    // being dragged, or the group is selected while something else is. The
-    // host answers that through NodeEditorComputations.group-in-drag, the same
-    // predicate its drag commit uses, so the live preview and the committed
-    // positions cannot disagree. Ungrouped, unselected nodes never read the
-    // drag state at all.
-    property <bool> follows-shared-drag: (root.selected || root.group-id != 0)
+    // A member also follows a shared drag when its group moves, draggable or
+    // not: the sheet is being dragged, or the group is selected while
+    // something else is. The host answers that through
+    // NodeEditorComputations.group-in-drag, the same predicate its drag commit
+    // uses, so the live preview and the committed positions cannot disagree.
+    // Ungrouped nodes that the selection does not carry never read the drag
+    // state at all.
+    property <bool> carried-by-selection: root.selected && root.draggable;
+    property <bool> follows-shared-drag: (root.carried-by-selection || root.group-id != 0)
         && DragState.is-dragging
         && node-id != DragState.dragged-node-id
-        && (root.selected || NodeEditorComputations.group-in-drag(root.group-id, DragState.dragged-node-id, DragState.dragged-group-id));
+        && (root.carried-by-selection || NodeEditorComputations.group-in-drag(root.group-id, DragState.dragged-node-id, DragState.dragged-group-id));
     property <length> world-pos-x: world-x + persistent-offset-x + (root.follows-shared-drag ? DragState.drag-offset-x : drag-area.offset-x);
     property <length> world-pos-y: world-y + persistent-offset-y + (root.follows-shared-drag ? DragState.drag-offset-y : drag-area.offset-y);
 

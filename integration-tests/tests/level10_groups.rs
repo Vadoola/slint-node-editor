@@ -213,6 +213,45 @@ fn node_drag_carries_a_selected_group_and_its_members() {
 }
 
 #[test]
+fn sheet_drag_carries_an_undraggable_member() {
+    let harness = harness();
+    harness.set_node_draggable(1, false);
+    settle(&harness);
+    let start = sheet_corner(&harness);
+
+    harness.mouse_down(start.0, start.1);
+    harness.mouse_move(start.0 + 40.0, start.1 + 30.0);
+    assert_eq!(cached_rect(&harness, 1), (140.0, 130.0));
+    harness.mouse_up(start.0 + 40.0, start.1 + 30.0);
+
+    assert_eq!(position(&harness, 1), (140.0, 130.0));
+}
+
+#[test]
+fn node_drag_carries_a_selected_undraggable_member_of_a_selected_group() {
+    let harness = harness();
+    harness.set_node_draggable(1, false);
+    harness.window.invoke_group_selected(GROUP, false);
+
+    // Shift keeps the group selected while member 1, then node 3, join the
+    // selection. The point clears node 1's embedded control.
+    let member = harness.world_to_screen((120.0, 180.0));
+    let start = harness.node_center(3).unwrap();
+    harness.shift_down();
+    harness.click(member.0, member.1);
+    assert_eq!(harness.selected_node_ids(), vec![1]);
+    assert_eq!(harness.selected_group_ids(), vec![GROUP]);
+    harness.mouse_down(start.0, start.1);
+    harness.mouse_move(start.0 + 10.0, start.1 + 20.0);
+    // Its selection alone would leave it in place; its moving group carries it.
+    assert_eq!(cached_rect(&harness, 1), (110.0, 120.0));
+    harness.mouse_up(start.0 + 10.0, start.1 + 20.0);
+    harness.shift_up();
+
+    assert_eq!(position(&harness, 1), (110.0, 120.0));
+}
+
+#[test]
 fn member_drag_moves_only_the_member_and_keeps_its_membership() {
     let harness = harness();
     let start = harness.node_center(1).unwrap();

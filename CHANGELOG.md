@@ -5,12 +5,18 @@
 - Fix a marquee started on a node or group sheet (with the box-selection
   modifier, or on an undraggable node) being drawn and committed offset by the
   editor's position in its window.
-- `BaseNode.draggable`, default `true`: off, a drag starting on the node does
+- `BaseNode.draggable` and `MovableNode::draggable`, both default `true`. Off,
+  a user drag moves the node only with its group. A drag starting on it does
   what one on empty canvas does (a marquee when `box-selection-on-empty` is
-  on, nothing otherwise); the node does not move, no `start-node-drag` or
-  `end-node-drag` is reported, and the release is no click. A press still
-  selects it and its hover is unchanged. A drag of another selected node, or
-  of its group's sheet, still carries it.
+  on, nothing otherwise): no `start-node-drag` or `end-node-drag` is
+  reported, and the release is no click. A press still selects it and its
+  hover is unchanged. A drag of other selected nodes leaves it in place, in
+  the live preview and in `GraphLogic::commit_drag` and
+  `GroupLogic::commit_drag`; a group that moves still carries it. Bind the
+  property from the row field your `MovableNode::draggable` reads, as you
+  bind `selected`: the preview reads one and the commit the other. The trait
+  method has a default, so existing implementations compile unchanged. Host
+  writes to the rows, such as a layout or an undo, are not governed.
 - Add node groups: `BaseGroup` and the default `GroupSheet`, rendered below the
   links for every row of `NodeEditor.groups`. Membership is `group-id` on the
   node rows; a sheet drags its members, and collapsing hides them through a

@@ -168,6 +168,16 @@ pub trait MovableNode: Clone + 'static {
     fn selected(&self) -> bool;
     fn set_x(&mut self, x: f32);
     fn set_y(&mut self, y: f32);
+
+    /// Whether a drag of another selected node carries this one. Read it from
+    /// the field `BaseNode.draggable` is bound to, for the reason `selected`
+    /// is read from the row: the node previews its move from that property
+    /// and the commit reads this, so two sources would let a node stand still
+    /// under the drag and jump on release. A group that moves still carries
+    /// its members whatever this answers.
+    fn draggable(&self) -> bool {
+        true
+    }
 }
 
 /// Helper functions for graph operations
@@ -233,12 +243,14 @@ impl GraphLogic {
 
     /// Commit a finished drag of `dragged_id` into a node model.
     ///
-    /// A row moves if it is selected, or if it is the dragged node itself. That
-    /// one rule covers every case without a second source of truth to consult:
+    /// A row moves if it is the dragged node itself, or if it is selected and
+    /// [`draggable`](MovableNode::draggable). That one rule covers every case
+    /// without a second source of truth to consult:
     ///
-    /// - Dragging a node that is part of a multi-selection moves the whole
-    ///   selection, because the editor selects an unselected node before it
-    ///   starts dragging it.
+    /// - Dragging a node that is part of a multi-selection moves every
+    ///   draggable row of the selection, because the editor selects an
+    ///   unselected node before it starts dragging it. A selected row that is
+    ///   not draggable stays where it is.
     /// - A host that wires no selection at all has no selected rows, so only
     ///   the dragged node moves.
     /// - Splitting nodes across several models composes: the dragged node lives
@@ -250,13 +262,19 @@ impl GraphLogic {
     {
         for i in 0..model.row_count() {
             if let Some(mut node) = model.row_data(i) {
-                if node.selected() || node.id() == dragged_id {
+                if node.id() == dragged_id || Self::carried_by_selection(&node) {
                     node.set_x(node.x() + delta_x);
                     node.set_y(node.y() + delta_y);
                     model.set_row_data(i, node);
                 }
             }
         }
+    }
+
+    /// Whether a drag of another node carries this row as part of the
+    /// selection. `BaseNode.carried-by-selection` previews the same rule.
+    pub(crate) fn carried_by_selection<T: MovableNode>(node: &T) -> bool {
+        node.selected() && node.draggable()
     }
 
     /// Check if a link with the given direction already exists
@@ -1464,6 +1482,7 @@ mod tests {
         x: f32,
         y: f32,
         selected: bool,
+        draggable: bool,
     }
 
     impl MovableNode for TestMovableNode {
@@ -1485,13 +1504,22 @@ mod tests {
         fn set_y(&mut self, y: f32) {
             self.y = y;
         }
+        fn draggable(&self) -> bool {
+            self.draggable
+        }
     }
 
     /// `(id, x, y, selected)` rows.
     fn movable_model(rows: &[(i32, f32, f32, bool)]) -> std::rc::Rc<VecModel<TestMovableNode>> {
         std::rc::Rc::new(VecModel::from(
             rows.iter()
-                .map(|&(id, x, y, selected)| TestMovableNode { id, x, y, selected })
+                .map(|&(id, x, y, selected)| TestMovableNode {
+                    id,
+                    x,
+                    y,
+                    selected,
+                    draggable: true,
+                })
                 .collect::<Vec<_>>(),
         ))
     }
@@ -1559,6 +1587,18 @@ mod tests {
         GraphLogic::commit_drag(&model, 1, -50.0, -30.0);
 
         assert_eq!(positions(&model), vec![(50.0, 70.0)]);
+    }
+
+    #[test]
+    fn commit_drag_leaves_a_selected_undraggable_node_in_place() {
+        let model = movable_model(&[(1, 0.0, 0.0, true), (2, 100.0, 100.0, true)]);
+        let mut undraggable = model.row_data(1).unwrap();
+        undraggable.draggable = false;
+        model.set_row_data(1, undraggable);
+
+        GraphLogic::commit_drag(&model, 1, 10.0, 20.0);
+
+        assert_eq!(positions(&model), vec![(10.0, 20.0), (100.0, 100.0)]);
     }
 }
 

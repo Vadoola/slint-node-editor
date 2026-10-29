@@ -188,9 +188,12 @@ impl GroupLogic {
 
     /// Commit a finished drag into one node model.
     ///
-    /// A row moves if it is the dragged node, if it is selected, or if it is a
-    /// member of a group that moves. Call once per node model when nodes are
-    /// split across several; the dragged node lives in exactly one of them.
+    /// A row moves if it is the dragged node, if it is selected and
+    /// [`draggable`](MovableNode::draggable), or if it is a member of a group
+    /// that moves. A member keeps its place in a moving group whether or not
+    /// it is draggable: left behind, it would sit outside the sheet it still
+    /// belongs to. Call once per node model when nodes are split across
+    /// several; the dragged node lives in exactly one of them.
     pub fn commit_node_drag<T, G>(
         nodes: &VecModel<T>,
         groups: &impl Model<Data = G>,
@@ -204,7 +207,7 @@ impl GroupLogic {
         let moving: HashSet<i32> = Self::moving_groups(groups, dragged).into_iter().collect();
         update_rows(nodes, |node| {
             let moves = dragged == Dragged::Node(node.id())
-                || node.selected()
+                || GraphLogic::carried_by_selection(node)
                 || (node.group_id() != 0 && moving.contains(&node.group_id()));
             if moves {
                 node.set_x(node.x() + delta_x);
@@ -447,6 +450,7 @@ mod tests {
         y: f32,
         selected: bool,
         group_id: i32,
+        draggable: bool,
     }
 
     impl MovableNode for Node {
@@ -467,6 +471,9 @@ mod tests {
         }
         fn set_y(&mut self, y: f32) {
             self.y = y;
+        }
+        fn draggable(&self) -> bool {
+            self.draggable
         }
     }
 
@@ -515,6 +522,14 @@ mod tests {
             y: 0.0,
             selected,
             group_id,
+            draggable: true,
+        }
+    }
+
+    fn undraggable(node: Node) -> Node {
+        Node {
+            draggable: false,
+            ..node
         }
     }
 
@@ -598,6 +613,42 @@ mod tests {
         GroupLogic::commit_drag(&nodes, &groups, Dragged::Group(7), 5.0, 0.0);
 
         assert_eq!(nodes.row_data(0).unwrap().x, 15.0);
+    }
+
+    #[test]
+    fn a_selected_undraggable_node_stays_when_another_node_is_dragged() {
+        let nodes = Rc::new(VecModel::from(vec![
+            node(1, 0, true),
+            undraggable(node(2, 0, true)),
+        ]));
+        let groups = Rc::new(VecModel::from(Vec::<Group>::new()));
+
+        GroupLogic::commit_drag(&nodes, &groups, Dragged::Node(1), 5.0, 0.0);
+
+        assert_eq!(positions(&nodes), vec![(1, 15.0), (2, 20.0)]);
+    }
+
+    #[test]
+    fn an_undraggable_member_moves_with_its_group() {
+        // Its own sheet dragged, then its selected group carried by a node
+        // drag: either way the member keeps its place in the group, selected
+        // or not.
+        for (dragged, group_selected) in [(Dragged::Group(7), false), (Dragged::Node(3), true)] {
+            let nodes = Rc::new(VecModel::from(vec![
+                undraggable(node(1, 7, false)),
+                undraggable(node(2, 7, true)),
+                node(3, 0, true),
+            ]));
+            let groups = Rc::new(VecModel::from(vec![group(7, group_selected)]));
+
+            GroupLogic::commit_drag(&nodes, &groups, dragged, 5.0, 0.0);
+
+            assert_eq!(
+                positions(&nodes)[..2],
+                [(1, 15.0), (2, 25.0)],
+                "{dragged:?}"
+            );
+        }
     }
 
     #[test]

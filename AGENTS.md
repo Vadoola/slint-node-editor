@@ -113,9 +113,13 @@ VecModel<LinkData>       // Logical connections
   does this. A host that defers selection updates must also own its drag policy
   and commit; selection changes during an active drag are otherwise unspecified.
 - **Drag**: `end-node-drag` carries the dragged node id, and the commit moves
-  that node plus whatever the rows show as selected (`GraphLogic::commit_drag`).
-  Reading `selected` off the row is deliberate: it is the same data the editor
-  renders, so a drag's visuals and its commit cannot disagree.
+  that node plus whatever the rows show as selected and draggable
+  (`GraphLogic::commit_drag`). Reading `selected` off the row is deliberate: it
+  is the same data the editor renders, so a drag's visuals and its commit
+  cannot disagree. `draggable` follows the same rule: `BaseNode.draggable` is
+  bound from the row field `MovableNode::draggable` reads. An undraggable node
+  never starts a drag and is not carried by the selection; a group that moves
+  still carries it.
 
 **Groups**: model data like selection. Membership is `group_id` on the node
 rows (`GroupMember`); each group is a `GroupData` row (authoritative bounds,
