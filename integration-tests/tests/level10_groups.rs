@@ -12,8 +12,10 @@ use common::harness::{
     DragState, GroupData, LinkData, MinimalTestHarness, NodeEditorComputations, NodeEditorEvents,
     NodeEditorInternalCallbacks,
 };
-use slint::{Color, ComponentHandle, SharedString};
+use slint::{platform::Key, Color, ComponentHandle, SharedString};
 use slint_node_editor::GroupLogic;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const GROUP: i32 = 7;
 const HEADER_HEIGHT: f32 = 32.0;
@@ -549,6 +551,44 @@ fn marquee_selects_the_sheet_by_intersection() {
     assert!(
         harness.selected_group_ids().is_empty(),
         "background click clears"
+    );
+}
+
+#[test]
+fn a_marquee_started_on_a_sheet_is_editor_relative() {
+    const EDITOR_X: f32 = 30.0;
+    const EDITOR_Y: f32 = 20.0;
+    let harness = harness();
+    harness.window.set_test_editor_x(EDITOR_X);
+    harness.window.set_test_editor_y(EDITOR_Y);
+    settle(&harness);
+    // The modifier must reach the sheet, not the editor's own overlay.
+    harness.window.invoke_clear_editor_focus();
+    assert_eq!(
+        (
+            harness.window.get_editor_screen_x(),
+            harness.window.get_editor_screen_y()
+        ),
+        (EDITOR_X, EDITOR_Y)
+    );
+    let commits = Rc::new(RefCell::new(Vec::new()));
+    harness.window.on_box_selection_committed({
+        let commits = commits.clone();
+        move |x, y, width, height, _| commits.borrow_mut().push((x, y, width, height))
+    });
+
+    let (x, y) = sheet_corner(&harness);
+    harness.key_press(Key::Control);
+    harness.mouse_down(x, y);
+    harness.mouse_move(x + 300.0, y + 200.0);
+    harness.mouse_move(x + 400.0, y + 250.0);
+    harness.mouse_up(x + 400.0, y + 250.0);
+    harness.key_release(Key::Control);
+
+    assert!(harness.tracker.group_drag_ended.borrow().is_empty());
+    assert_eq!(
+        *commits.borrow(),
+        vec![(x - EDITOR_X, y - EDITOR_Y, 400.0, 250.0)]
     );
 }
 
