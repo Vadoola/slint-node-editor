@@ -75,3 +75,13 @@ Next time: Check initial control and node rectangles after changing overlay size
 Revisit when: The overlay deliberately occludes content or the example has a defined reserved area under every viewport transform.
 Cost: One implemented and compiled panel layout replaced after review.
 Scope: project     Status: active
+
+## 2026-10-29 · A rejected edit in a batch went unnoticed until after commit · #tooling #CHANGELOG.md #docs
+Situation: Updating CHANGELOG.md, docs/component-reference.md and AGENTS.md for the `draggable` selection rule, as one batch of edits.
+Tried: Sent four edits together, two to files only viewed through the shell, then built and committed.
+Outcome: Two edits were rejected as "file has not been read yet". The AGENTS.md one was noticed and redone; the CHANGELOG one was not. The commit carried the old Unreleased entry claiming a selection drag still carries the node, the opposite of the new rule. A grep for `movable` passed because the stale text already said `draggable`.
+Evidence: 2026-10-29 the commit's staged-file list had no CHANGELOG.md; fixed by amending the unpushed commit.
+Next time: Check every result in a batch of edits before building on it; read a file with the editor's own read before editing it, even after viewing it through the shell; compare the staged list with the intended file list before committing. Verified: the staged-list check is what caught it.
+Revisit when: Edits are applied all-or-nothing, or shell views count as reads.
+Cost: One amended commit; a contradicting CHANGELOG entry briefly committed.
+Scope: global-candidate     Status: active
